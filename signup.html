@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
     <style>
+
         body {
             font-family: Arial, sans-serif;
             background-color: #1c1b29;
@@ -52,55 +53,7 @@
         }
         p {
             margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h1>Login</h1>
-    <form id="login-form">
-        <label for="login-username">Username:</label>
-        <input type="text" id="login-username" required>
-        <label for="login-password">Password:</label>
-        <input type="password" id="login-password" required>
-        <button type="submit" class="button">Login</button>
-        <p>Don't have an account? <a href="signup.html" style="color: #7a4de5;">Sign up here</a></p>
-    </form>
-</div>
-
-<script>
-    function handleLogin(event) {
-        event.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
-
-        const userData = JSON.parse(localStorage.getItem('userData')) || {};
-        if (userData[username] && userData[username].password === password) {
-            localStorage.setItem('userId', username);
-            window.location.href = 'index.html';
-        } else {
-            alert('Invalid username or password');
-        }
-    }
-
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
-</script>
-
-</body>
-</html>
-signup.html:
-
-html
-Copy code
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-    <style>
-        /* Your existing styles */
-    </style>
+        }    </style>
 </head>
 <body>
 
@@ -117,12 +70,14 @@ Copy code
 </div>
 
 <script>
-    function handleSignup(event) {
+    document.getElementById('signup-form').addEventListener('submit', function(event) {
         event.preventDefault();
+
         const username = document.getElementById('signup-username').value;
         const password = document.getElementById('signup-password').value;
 
         const userData = JSON.parse(localStorage.getItem('userData')) || {};
+
         if (userData[username]) {
             alert('Username already exists');
         } else {
@@ -131,9 +86,7 @@ Copy code
             localStorage.setItem('userId', username);
             window.location.href = 'index.html';
         }
-    }
-
-    document.getElementById('signup-form').addEventListener('submit', handleSignup);
+    });
 </script>
 
 </body>
