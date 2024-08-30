@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1b29;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1c1b29;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #c59df7;
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            color: #b4a7d6;
+        }
+        input[type="text"], input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 15px;
+            background-color: #3b3659;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+        }
+        .button {
+            background-color: #7a4de5;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #6a41c7;
+        }
+        p {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sign Up</h1>
+    <form id="signup-form">
+        <label for="signup-username">Username:</label>
+        <input type="text" id="signup-username" required>
+        <label for="signup-password">Password:</label>
+        <input type="password" id="signup-password" required>
+        <button type="submit" class="button">Sign Up</button>
+        <p>Already have an account? <a href="login.html" style="color: #7a4de5;">Login here</a></p>
+    </form>
+</div>
+
+<script>
+    function handleSignup(event) {
+        event.preventDefault();
+        const username = document.getElementById('signup-username').value;
+        const password = document.getElementById('signup-password').value;
+
+        const userData = JSON.parse(localStorage.getItem('userData')) || {};
+        if (userData[username]) {
+            alert('Username already exists');
+        } else {
+            userData[username] = { password: password, balance: 10000 };
+            localStorage.setItem('userData', JSON.stringify(userData));
+            localStorage.setItem('userId', username);
+            window.location.href = 'index.html';
+        }
+    }
+
+    document.getElementById('signup-form').addEventListener('submit', handleSignup);
+</script>
+
+</body>
+</html>
