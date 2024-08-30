@@ -3,98 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>voltgamble</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>volt gambling</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1c1b29;
+            color: #ffffff;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #28223f;
+            padding: 15px 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+        }
+        .header a {
+            color: #c59df7;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        .header a:hover {
+            color: #e6b3ff;
+        }
+        .saved-money {
+            color: #b4a7d6;
+            font-size: 16px;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1c1b29;
+            border-radius: 10px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 20px;
+            color: #c59df7;
+        }
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #b4a7d6;
+        }
+        input[type="number"] {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 15px;
+            background-color: #3b3659;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #7a4de5;
+            color: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .button:hover {
+            background-color: #6a41c7;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+            gap: 4px;
+            margin-top: 15px;
+        }
+        .grid-cell {
+            width: 100%;
+            padding-top: 100%;
+            background-color: #3b3659;
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+            aspect-ratio: 1 / 1; /* Maintains a square aspect ratio */
+        }
+        .grid-cell.revealed {
+            background-color: #9c78ed;
+        }
+        .grid-cell.mine {
+            background-color: #d16c6c;
+        }
+        .grid-cell span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            color: #ffffff;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .header a {
+                margin: 5px 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div id="game-container" class="hidden">
-        <div id="money-display">Money: $0.00</div>
-        <div id="minesweeper">
-            <!-- Minesweeper grid will be inserted here -->
-        </div>
-        <div id="button-container">
-            <button id="start-button" class="action-button">Start Mines</button>
-            <button id="cashout-button" class="action-button hidden">Cash Out</button>
-        </div>
+
+<div class="header">
+    <div class="links">
+        <a href="#">Gunshot Mines</a>
     </div>
-    <script>
+    <div class="saved-money" id="savedMoney">Saved Money: $0</div>
+</div>
+
+<div class="container">
+    <h1>Gunshot Mines</h1>
+    <label for="betAmount">Bet Amount</label>
+    <input type="number" id="betAmount" value="1000">
+
+    <label for="minesAmount">Mines Amount</label>
+    <input type="number" id="minesAmount" value="3">
+
+    <button class="button" id="startRound">Start Round</button>
+    <button class="button" id="cashOut">Cash Out</button>
+
+    <div id="grid" class="grid">
+        <!-- Mines grid will be generated here -->
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
         function getUserId() {
             return localStorage.getItem('userId');
         }
 
         function getUserData() {
+            return JSON.parse(localStorage.getItem('userData')) || {};
+        }
+
+        function getUserBalance() {
             const userId = getUserId();
-            if (userId) {
-                return JSON.parse(localStorage.getItem('userData'))[userId];
-            }
-            return null;
+            const userData = getUserData();
+            return userData[userId] ? userData[userId].balance : 10000; // Default balance if not found
         }
 
-        function saveUserData(userData) {
+        function setUserBalance(balance) {
             const userId = getUserId();
+            const userData = getUserData();
             if (userId) {
-                let allUserData = JSON.parse(localStorage.getItem('userData')) || {};
-                allUserData[userId] = userData;
-                localStorage.setItem('userData', JSON.stringify(allUserData));
+                userData[userId].balance = balance;
+                localStorage.setItem('userData', JSON.stringify(userData));
             }
         }
 
-        function updateBalanceDisplay(balance) {
-            document.getElementById('money-display').textContent = `Money: $${balance.toFixed(2)}`;
+        function redirectToLogin() {
+            window.location.href = 'login.html';
         }
 
-        function periodicSave() {
-            const userData = getUserData();
-            if (userData) {
-                saveUserData(userData);
+        function checkLogin() {
+            if (!getUserId()) {
+                redirectToLogin();
             }
         }
 
-        window.addEventListener('beforeunload', () => {
-            periodicSave();
-        });
+        function updateSavedMoney() {
+            const balance = getUserBalance();
+            document.getElementById('savedMoney').textContent = `Saved Money: $${balance}`;
+        }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const userData = getUserData();
-            if (!userData) {
-                window.location.href = 'login.html';
+        function startRound() {
+            const betAmount = parseInt(document.getElementById('betAmount').value);
+            const minesAmount = parseInt(document.getElementById('minesAmount').value);
+            if (betAmount > fakeMoney || betAmount <= 0 || minesAmount < 1 || minesAmount >= 25) {
+                alert('Invalid bet or mines amount');
                 return;
             }
 
-            updateBalanceDisplay(userData.balance);
+            fakeMoney -= betAmount;
+            setUserBalance(fakeMoney); // Update balance
+            currentMultiplier = 1;
+            gameStarted = true;
+            mines = generateMines(minesAmount);
+            createGrid();
+            updateSavedMoney();
+        }
 
-            const startButton = document.getElementById('start-button');
-            const cashoutButton = document.getElementById('cashout-button');
+        function createGrid() {
+            const gridElement = document.getElementById('grid');
+            gridElement.innerHTML = '';
+            for (let i = 0; i < 25; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('grid-cell');
+                cell.dataset.revealed = 'false'; // Add a flag to track if the cell has been revealed
+                cell.addEventListener('click', () => revealCell(cell, i));
+                gridElement.appendChild(cell);
+            }
+        }
 
-            startButton.addEventListener('click', () => {
+        function revealCell(cell, index) {
+            if (!gameStarted || cell.dataset.revealed === 'true') return; // Check if the cell is already revealed
+
+            if (mines.includes(index)) {
+                cell.classList.add('mine');
+                cell.innerHTML = '<span>💣</span>';
+                gameStarted = false;
+                alert('You hit a mine! You lose your bet.');
+            } else {
+                cell.classList.add('revealed');
+                cell.dataset.revealed = 'true'; // Mark the cell as revealed
+                currentMultiplier += 0.5;
+                cell.innerHTML = `<span>x${currentMultiplier.toFixed(1)}</span>`;
+            }
+        }
+
+        function cashOut() {
+            if (gameStarted) {
                 const betAmount = parseInt(document.getElementById('betAmount').value);
-                const minesAmount = parseInt(document.getElementById('minesAmount').value);
-                if (betAmount > userData.balance || betAmount <= 0 || minesAmount < 1 || minesAmount >= 25) {
-                    alert('Invalid bet or mines amount');
-                    return;
+                fakeMoney += betAmount * currentMultiplier;
+                setUserBalance(fakeMoney); // Update balance
+                alert(`You cashed out! Current balance: $${fakeMoney}`);
+                gameStarted = false;
+                updateSavedMoney();
+            }
+        }
+
+        function generateMines(amount) {
+            const mines = [];
+            while (mines.length < amount) {
+                const minePosition = Math.floor(Math.random() * 25);
+                if (!mines.includes(minePosition)) {
+                    mines.push(minePosition);
                 }
+            }
+            return mines;
+        }
 
-                userData.balance -= betAmount;
-                updateBalanceDisplay(userData.balance);
-                saveUserData(userData);
+        // Initial setup
+        checkLogin();
+        let fakeMoney = getUserBalance();
+        let currentMultiplier = 1;
+        let gameStarted = false;
+        let mines = [];
 
-                // Game start logic
-                // ...
-            });
+        document.getElementById('startRound').addEventListener('click', startRound);
+        document.getElementById('cashOut').addEventListener('click', cashOut);
 
-            cashoutButton.addEventListener('click', () => {
-                // Cash out logic
-                const betAmount = parseInt(document.getElementById('betAmount').value);
-                userData.balance += betAmount; // Example calculation
-                updateBalanceDisplay(userData.balance);
-                saveUserData(userData);
-            });
+        // Initial fetch of the saved money balance
+        updateSavedMoney();
+    });
+</script>
 
-            // Handle game logic to periodically save balance
-            setInterval(() => {
-                periodicSave();
-            }, 1000); // Save every 1 second
-        });
-    </script>
 </body>
 </html>
