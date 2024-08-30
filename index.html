@@ -123,30 +123,6 @@
     </style>
 </head>
 <body>
-
-<div class="header">
-    <div class="links">
-        <a href="#">Gunshot Mines</a>
-    </div>
-    <div class="saved-money" id="savedMoney">Saved Money: $0</div>
-</div>
-
-<div class="container">
-    <h1>Gunshot Mines</h1>
-    <label for="betAmount">Bet Amount</label>
-    <input type="number" id="betAmount" value="1000">
-
-    <label for="minesAmount">Mines Amount</label>
-    <input type="number" id="minesAmount" value="3">
-
-    <button class="button" id="startRound">Start Round</button>
-    <button class="button" id="cashOut">Cash Out</button>
-
-    <div id="grid" class="grid">
-        <!-- Mines grid will be generated here -->
-    </div>
-</div>
-
 <script>
     function getUserId() {
         return localStorage.getItem('userId');
@@ -171,7 +147,6 @@
             }
             userData[userId].balance = balance;
             localStorage.setItem('userData', JSON.stringify(userData));
-            localStorage.setItem('balanceChanged', 'true'); // Indicate that the balance has changed
         }
     }
 
@@ -199,11 +174,12 @@
         }
 
         fakeMoney -= betAmount;
+        setUserBalance(fakeMoney); // Update balance
         currentMultiplier = 1;
         gameStarted = true;
         mines = generateMines(minesAmount);
         createGrid();
-        updateSavedMoney(); // Call to update saved money immediately
+        updateSavedMoney();
     }
 
     function createGrid() {
@@ -238,8 +214,10 @@
         if (gameStarted) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
             fakeMoney += betAmount * currentMultiplier;
+            setUserBalance(fakeMoney); // Update balance
+            alert(`You cashed out! Current balance: $${fakeMoney}`);
             gameStarted = false;
-            updateSavedMoney(); // Update saved money immediately
+            updateSavedMoney();
         }
     }
 
@@ -268,13 +246,7 @@
     // Initial fetch of the saved money balance
     updateSavedMoney();
 
-    window.addEventListener('beforeunload', () => {
-        if (localStorage.getItem('balanceChanged') === 'true') {
-            localStorage.removeItem('balanceChanged');
-            // Save balance when page unloads
-            setUserBalance(fakeMoney);
-        }
-    });
+    // Removed the beforeunload event listener to prevent unnecessary writes
 </script>
 
 </body>
