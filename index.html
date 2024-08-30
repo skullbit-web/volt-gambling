@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>volt gambling</title>
+    <title>Fake Money Gambling</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -149,6 +149,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        let fakeMoney = getUserBalance();
+        let currentMultiplier = 1;
+        let gameStarted = false;
+        let mines = [];
+        let balanceChanged = false;
+
         function getUserId() {
             return localStorage.getItem('userId');
         }
@@ -169,6 +175,7 @@
             if (userId) {
                 userData[userId].balance = balance;
                 localStorage.setItem('userData', JSON.stringify(userData));
+                balanceChanged = true;
             }
         }
 
@@ -254,18 +261,21 @@
             return mines;
         }
 
-        // Initial setup
+        // Check if user is logged in
         checkLogin();
-        let fakeMoney = getUserBalance();
-        let currentMultiplier = 1;
-        let gameStarted = false;
-        let mines = [];
 
         document.getElementById('startRound').addEventListener('click', startRound);
         document.getElementById('cashOut').addEventListener('click', cashOut);
 
         // Initial fetch of the saved money balance
         updateSavedMoney();
+
+        // Save balance only if it has changed
+        window.addEventListener('beforeunload', () => {
+            if (balanceChanged) {
+                setUserBalance(fakeMoney); // Make sure balance is saved before the page unloads
+            }
+        });
     });
 </script>
 
