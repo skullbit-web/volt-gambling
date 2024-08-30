@@ -166,6 +166,9 @@
         const userId = getUserId();
         const userData = getUserData();
         if (userId) {
+            if (!userData[userId]) {
+                userData[userId] = {};
+            }
             userData[userId].balance = balance;
             localStorage.setItem('userData', JSON.stringify(userData));
             localStorage.setItem('balanceChanged', 'true'); // Indicate that the balance has changed
@@ -196,12 +199,11 @@
         }
 
         fakeMoney -= betAmount;
-        setUserBalance(fakeMoney); // Update balance
         currentMultiplier = 1;
         gameStarted = true;
         mines = generateMines(minesAmount);
         createGrid();
-        updateSavedMoney();
+        updateSavedMoney(); // Call to update saved money immediately
     }
 
     function createGrid() {
@@ -236,10 +238,8 @@
         if (gameStarted) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
             fakeMoney += betAmount * currentMultiplier;
-            setUserBalance(fakeMoney); // Update balance
-            alert(`You cashed out! Current balance: ${fakeMoney}`);
             gameStarted = false;
-            updateSavedMoney();
+            updateSavedMoney(); // Update saved money immediately
         }
     }
 
@@ -271,7 +271,8 @@
     window.addEventListener('beforeunload', () => {
         if (localStorage.getItem('balanceChanged') === 'true') {
             localStorage.removeItem('balanceChanged');
-            localStorage.setItem('userData', JSON.stringify(getUserData())); // Save balance when page unloads
+            // Save balance when page unloads
+            setUserBalance(fakeMoney);
         }
     });
 </script>
