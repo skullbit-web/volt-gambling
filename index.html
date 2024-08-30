@@ -148,134 +148,131 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        let fakeMoney = getUserBalance();
-        let currentMultiplier = 1;
-        let gameStarted = false;
-        let mines = [];
-        let balanceChanged = false;
+    function getUserId() {
+        return localStorage.getItem('userId');
+    }
 
-        function getUserId() {
-            return localStorage.getItem('userId');
+    function getUserData() {
+        return JSON.parse(localStorage.getItem('userData')) || {};
+    }
+
+    function getUserBalance() {
+        const userId = getUserId();
+        const userData = getUserData();
+        return userData[userId] ? userData[userId].balance : 10000; // Default balance if not found
+    }
+
+    function setUserBalance(balance) {
+        const userId = getUserId();
+        const userData = getUserData();
+        if (userId) {
+            userData[userId].balance = balance;
+            localStorage.setItem('userData', JSON.stringify(userData));
+            localStorage.setItem('balanceChanged', 'true'); // Indicate that the balance has changed
+        }
+    }
+
+    function redirectToLogin() {
+        window.location.href = 'login.html';
+    }
+
+    function checkLogin() {
+        if (!getUserId()) {
+            redirectToLogin();
+        }
+    }
+
+    function updateSavedMoney() {
+        const balance = getUserBalance();
+        document.getElementById('savedMoney').textContent = `Saved Money: $${balance}`;
+    }
+
+    function startRound() {
+        const betAmount = parseInt(document.getElementById('betAmount').value);
+        const minesAmount = parseInt(document.getElementById('minesAmount').value);
+        if (betAmount > fakeMoney || betAmount <= 0 || minesAmount < 1 || minesAmount >= 25) {
+            alert('Invalid bet or mines amount');
+            return;
         }
 
-        function getUserData() {
-            return JSON.parse(localStorage.getItem('userData')) || {};
-        }
+        fakeMoney -= betAmount;
+        setUserBalance(fakeMoney); // Update balance
+        currentMultiplier = 1;
+        gameStarted = true;
+        mines = generateMines(minesAmount);
+        createGrid();
+        updateSavedMoney();
+    }
 
-        function getUserBalance() {
-            const userId = getUserId();
-            const userData = getUserData();
-            return userData[userId] ? userData[userId].balance : 10000; // Default balance if not found
+    function createGrid() {
+        const gridElement = document.getElementById('grid');
+        gridElement.innerHTML = '';
+        for (let i = 0; i < 25; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            cell.dataset.revealed = 'false'; // Add a flag to track if the cell has been revealed
+            cell.addEventListener('click', () => revealCell(cell, i));
+            gridElement.appendChild(cell);
         }
+    }
 
-        function setUserBalance(balance) {
-            const userId = getUserId();
-            const userData = getUserData();
-            if (userId) {
-                userData[userId].balance = balance;
-                localStorage.setItem('userData', JSON.stringify(userData));
-                balanceChanged = true; // Mark that the balance has changed
-            }
+    function revealCell(cell, index) {
+        if (!gameStarted || cell.dataset.revealed === 'true') return; // Check if the cell is already revealed
+
+        if (mines.includes(index)) {
+            cell.classList.add('mine');
+            cell.innerHTML = '<span>💣</span>';
+            gameStarted = false;
+            alert('You hit a mine! You lose your bet.');
+        } else {
+            cell.classList.add('revealed');
+            cell.dataset.revealed = 'true'; // Mark the cell as revealed
+            currentMultiplier += 0.5;
+            cell.innerHTML = `<span>x${currentMultiplier.toFixed(1)}</span>`;
         }
+    }
 
-        function redirectToLogin() {
-            window.location.href = 'login.html';
-        }
-
-        function checkLogin() {
-            if (!getUserId()) {
-                redirectToLogin();
-            }
-        }
-
-        function updateSavedMoney() {
-            const balance = getUserBalance();
-            document.getElementById('savedMoney').textContent = `Saved Money: $${balance}`;
-        }
-
-        function startRound() {
+    function cashOut() {
+        if (gameStarted) {
             const betAmount = parseInt(document.getElementById('betAmount').value);
-            const minesAmount = parseInt(document.getElementById('minesAmount').value);
-            if (betAmount > fakeMoney || betAmount <= 0 || minesAmount < 1 || minesAmount >= 25) {
-                alert('Invalid bet or mines amount');
-                return;
-            }
-
-            fakeMoney -= betAmount;
+            fakeMoney += betAmount * currentMultiplier;
             setUserBalance(fakeMoney); // Update balance
-            currentMultiplier = 1;
-            gameStarted = true;
-            mines = generateMines(minesAmount);
-            createGrid();
+            alert(`You cashed out! Current balance: ${fakeMoney}`);
+            gameStarted = false;
             updateSavedMoney();
         }
+    }
 
-        function createGrid() {
-            const gridElement = document.getElementById('grid');
-            gridElement.innerHTML = '';
-            for (let i = 0; i < 25; i++) {
-                const cell = document.createElement('div');
-                cell.classList.add('grid-cell');
-                cell.dataset.revealed = 'false'; // Add a flag to track if the cell has been revealed
-                cell.addEventListener('click', () => revealCell(cell, i));
-                gridElement.appendChild(cell);
+    function generateMines(amount) {
+        const mines = [];
+        while (mines.length < amount) {
+            const minePosition = Math.floor(Math.random() * 25);
+            if (!mines.includes(minePosition)) {
+                mines.push(minePosition);
             }
         }
+        return mines;
+    }
 
-        function revealCell(cell, index) {
-            if (!gameStarted || cell.dataset.revealed === 'true') return; // Check if the cell is already revealed
+    // Check if user is logged in
+    checkLogin();
+    let fakeMoney = getUserBalance();
+    let currentMultiplier = 1;
+    let gameStarted = false;
+    let mines = [];
+    const gridElement = document.getElementById('grid');
 
-            if (mines.includes(index)) {
-                cell.classList.add('mine');
-                cell.innerHTML = '<span>💣</span>';
-                gameStarted = false;
-                alert('You hit a mine! You lose your bet.');
-            } else {
-                cell.classList.add('revealed');
-                cell.dataset.revealed = 'true'; // Mark the cell as revealed
-                currentMultiplier += 0.5;
-                cell.innerHTML = `<span>x${currentMultiplier.toFixed(1)}</span>`;
-            }
+    document.getElementById('startRound').addEventListener('click', startRound);
+    document.getElementById('cashOut').addEventListener('click', cashOut);
+
+    // Initial fetch of the saved money balance
+    updateSavedMoney();
+
+    window.addEventListener('beforeunload', () => {
+        if (localStorage.getItem('balanceChanged') === 'true') {
+            localStorage.removeItem('balanceChanged');
+            localStorage.setItem('userData', JSON.stringify(getUserData())); // Save balance when page unloads
         }
-
-        function cashOut() {
-            if (gameStarted) {
-                const betAmount = parseInt(document.getElementById('betAmount').value);
-                fakeMoney += betAmount * currentMultiplier;
-                setUserBalance(fakeMoney); // Update balance
-                alert(`You cashed out! Current balance: $${fakeMoney}`);
-                gameStarted = false;
-                updateSavedMoney();
-            }
-        }
-
-        function generateMines(amount) {
-            const mines = [];
-            while (mines.length < amount) {
-                const minePosition = Math.floor(Math.random() * 25);
-                if (!mines.includes(minePosition)) {
-                    mines.push(minePosition);
-                }
-            }
-            return mines;
-        }
-
-        // Check if user is logged in
-        checkLogin();
-
-        document.getElementById('startRound').addEventListener('click', startRound);
-        document.getElementById('cashOut').addEventListener('click', cashOut);
-
-        // Initial fetch of the saved money balance
-        updateSavedMoney();
-
-        // Save balance only if it has changed
-        window.addEventListener('beforeunload', () => {
-            if (balanceChanged) {
-                localStorage.setItem('userData', JSON.stringify(getUserData())); // Save balance when page unloads
-            }
-        });
     });
 </script>
 
