@@ -70,7 +70,7 @@
 </div>
 
 <script>
-    document.getElementById('signup-form').addEventListener('submit', async function(event) {
+    function handleSignup(event) {
         event.preventDefault();
         const username = document.getElementById('signup-username').value;
         const password = document.getElementById('signup-password').value;
@@ -82,9 +82,11 @@
             userData[username] = { password: password, balance: 10000 };
             localStorage.setItem('userData', JSON.stringify(userData));
             localStorage.setItem('userId', username);
-            window.location.href = 'index.html';  // Redirect to the game page
+            window.location.href = 'index.html';
         }
-    });
+    }
+
+    document.getElementById('signup-form').addEventListener('submit', handleSignup);
 </script>
 
 </body>
