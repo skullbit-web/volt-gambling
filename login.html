@@ -70,7 +70,7 @@
 </div>
 
 <script>
-    function handleLogin(event) {
+    document.getElementById('login-form').addEventListener('submit', async function(event) {
         event.preventDefault();
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
@@ -78,13 +78,11 @@
         const userData = JSON.parse(localStorage.getItem('userData')) || {};
         if (userData[username] && userData[username].password === password) {
             localStorage.setItem('userId', username);
-            window.location.href = 'index.html';
+            window.location.href = 'index.html';  // Redirect to the game page
         } else {
             alert('Invalid username or password');
         }
-    }
-
-    document.getElementById('login-form').addEventListener('submit', handleLogin);
+    });
 </script>
 
 </body>
