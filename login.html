@@ -71,19 +71,23 @@
 
 <script>
     function handleLogin(event) {
-        event.preventDefault();
+        event.preventDefault();  // Prevent the form from submitting in the default way
         const username = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
 
+        // Get user data from localStorage or create an empty object if none exists
         const userData = JSON.parse(localStorage.getItem('userData')) || {};
+
+        // Check if the username exists and the password matches
         if (userData[username] && userData[username].password === password) {
-            localStorage.setItem('userId', username);
-            window.location.href = 'index.html';
+            localStorage.setItem('userId', username);  // Save the user ID to localStorage
+            window.location.href = 'index.html';  // Redirect to the home page
         } else {
-            alert('Invalid username or password');
+            alert('Invalid username or password');  // Show an error message if credentials are incorrect
         }
     }
 
+    // Attach the handleLogin function to the form's submit event
     document.getElementById('login-form').addEventListener('submit', handleLogin);
 </script>
 
