@@ -52,8 +52,8 @@
         }
         p {
             margin-top: 10px;
-        }    </style>
-
+        }
+    </style>
 </head>
 <body>
 
@@ -70,7 +70,7 @@
 </div>
 
 <script>
-    function handleSignup(event) {
+    document.getElementById('signup-form').addEventListener('submit', async function(event) {
         event.preventDefault();
         const username = document.getElementById('signup-username').value;
         const password = document.getElementById('signup-password').value;
@@ -82,11 +82,9 @@
             userData[username] = { password: password, balance: 10000 };
             localStorage.setItem('userData', JSON.stringify(userData));
             localStorage.setItem('userId', username);
-            window.location.href = 'index.html';
+            window.location.href = 'index.html';  // Redirect to the game page
         }
-    }
-
-    document.getElementById('signup-form').addEventListener('submit', handleSignup);
+    });
 </script>
 
 </body>
