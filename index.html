@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fake Money Gambling</title>
+    <title>volt gambling</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -175,7 +175,7 @@
             if (userId) {
                 userData[userId].balance = balance;
                 localStorage.setItem('userData', JSON.stringify(userData));
-                balanceChanged = true;
+                balanceChanged = true; // Mark that the balance has changed
             }
         }
 
@@ -273,7 +273,7 @@
         // Save balance only if it has changed
         window.addEventListener('beforeunload', () => {
             if (balanceChanged) {
-                setUserBalance(fakeMoney); // Make sure balance is saved before the page unloads
+                localStorage.setItem('userData', JSON.stringify(getUserData())); // Save balance when page unloads
             }
         });
     });
